@@ -13,19 +13,14 @@ nltk.download('wordnet')
 
 f = pd.read_csv('movies.csv')
 
-# raw = f.read()
-# raw = raw.lower()  # converts to lowercase
-for _, row in f.iterrows():
-    movie_title = row['name']
-    movie_director = row['director']
-    movie_cast = row['star']
-    movie_genre = row['genre']
-    movie_year = row['year']
-# sent_tokens = nltk.sent_tokenize(f)  # converts to list of sentences
-# word_tokens = nltk.word_tokenize(f)  # converts to list of words
+raw = f.read()
+raw = raw.lower()  # converts to lowercase
 
-print(movie_title[:2])
-# print(word_tokens[:2])
+sent_tokens = nltk.sent_tokenize(f)  # converts to list of sentences
+word_tokens = nltk.word_tokenize(f)  # converts to list of words
+
+print(sent_tokens[:2])
+print(word_tokens[:2])
 
 lemmer = nltk.stem.WordNetLemmatizer()
 

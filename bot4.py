@@ -5,7 +5,6 @@ import random
 from nltk.stem import WordNetLemmatizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
 from nltk.corpus import stopwords
 
 nltk.download('punkt')  # first-time use only nltk.download ('wordnet') # first-time use only
@@ -61,7 +60,7 @@ def chatbot():
     movie_data = pd.read_csv('movies.csv')
 
     def format_movie_info(row):
-        return f"{row['name']} ({row['year']}) - directed by {row['director']}, starring {row['star']} ({row['genre']})"
+        return f"{row['name']} ({row['year']}) - directed by {row['director']}, starring {row['star']} ({row['genre']}), rating({row['score']}) "
 
     sample_text = [format_movie_info(row) for _, row in movie_data.iterrows()]
 
@@ -79,8 +78,6 @@ def chatbot():
         # Create a new input text from the main words
         main_text = ' '.join(main_words)
 
-        print(main_text)
-
         input_vector = vectorizer.transform([main_text])
 
         # Compute the cosine similarities between the input vector and the sample vectors
@@ -89,15 +86,27 @@ def chatbot():
         # Find the indices of the sample vectors with the highest cosine similarity
         best_indices = np.argsort(similarities)[::-1][:5]
 
+        flat = similarities.flatten()
+        flat.sort()
+        req_tfidf = flat[-2]
+
         movie_list = []
         for index in best_indices:
             title = movie_data.loc[index, 'name']
             star = str(movie_data.loc[index, 'star'])
             genre = movie_data.loc[index, 'genre']
             year = str(movie_data.loc[index, 'year'])
-            movie_list.append((title, star, genre, year))
+            rating = str(movie_data.loc[index, 'score'])
+            movie_list.append((title, star, genre, year, rating))
 
-        return movie_list
+        if req_tfidf == 0:
+            robo_response = robo_response + "I am sorry! I don't understand you"
+            return robo_response
+        else:
+            print("GUR: Here are some movies that might interest you:")
+            for i, movie in enumerate(movie_list, 1):
+                title, star, genre, year, rating = movie
+                print(f"{i}. {title} ({year}) - {genre}, starring {star}, rating {rating}")
 
     # Start the chat loop
     print(
@@ -112,14 +121,5 @@ def chatbot():
         else:
             # Preprocess the input text and find the best matching movie title
             input_text = preprocess(input_text)
-            movie_title = find_best_response(input_text)
-            if len(movie_title) == 0:
-                print("GUR: I couldn't find any matching movies.")
-            else:
-                print("GUR: Here are some movies that might interest you:")
-                for i, movie in enumerate(movie_title, 1):
-                    title, star, genre, year = movie
-                    print(f"{i}. {title} ({year}) - {genre}, starring {star}")
-
-
+            find_best_response(input_text)
 chatbot()
